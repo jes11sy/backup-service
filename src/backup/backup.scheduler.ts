@@ -45,33 +45,46 @@ export class BackupScheduler implements OnModuleInit {
   }
 
   /**
-   * Создать дефолтные расписания
+   * Создать дефолтные расписания из ENV переменных
    */
   private async createDefaultSchedules() {
     const defaultSchedules = [
       {
         type: BackupType.DAILY,
-        cronExpression: '0 3 * * *', // Каждый день в 3:00 AM
-        retentionDays: 7,
+        cronExpression: process.env.BACKUP_DAILY_CRON || '0 3 * * *',
+        retentionDays: parseInt(process.env.BACKUP_DAILY_RETENTION || '7', 10),
+        enabled: process.env.BACKUP_DAILY_ENABLED !== 'false',
       },
       {
         type: BackupType.WEEKLY,
-        cronExpression: '0 2 * * 0', // Каждое воскресенье в 2:00 AM
-        retentionDays: 30,
+        cronExpression: process.env.BACKUP_WEEKLY_CRON || '0 2 * * 0',
+        retentionDays: parseInt(process.env.BACKUP_WEEKLY_RETENTION || '30', 10),
+        enabled: process.env.BACKUP_WEEKLY_ENABLED !== 'false',
       },
       {
         type: BackupType.MONTHLY,
-        cronExpression: '0 1 1 * *', // 1-го числа каждого месяца в 1:00 AM
-        retentionDays: 365,
+        cronExpression: process.env.BACKUP_MONTHLY_CRON || '0 1 1 * *',
+        retentionDays: parseInt(process.env.BACKUP_MONTHLY_RETENTION || '365', 10),
+        enabled: process.env.BACKUP_MONTHLY_ENABLED !== 'false',
       },
     ];
 
     for (const schedule of defaultSchedules) {
-      await this.backupService.updateSchedule(schedule.type, schedule);
-      this.addCronJob(schedule.type, schedule.cronExpression);
+      await this.backupService.updateSchedule(schedule.type, {
+        cronExpression: schedule.cronExpression,
+        retentionDays: schedule.retentionDays,
+        enabled: schedule.enabled,
+      });
+      
+      if (schedule.enabled) {
+        this.addCronJob(schedule.type, schedule.cronExpression);
+        this.logger.log(`Enabled ${schedule.type} backup: ${schedule.cronExpression} (retention: ${schedule.retentionDays} days)`);
+      } else {
+        this.logger.log(`Disabled ${schedule.type} backup (set BACKUP_${schedule.type}_ENABLED=true to enable)`);
+      }
     }
 
-    this.logger.log('Default schedules created');
+    this.logger.log('Schedules initialized from ENV variables');
   }
 
   /**

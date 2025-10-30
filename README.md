@@ -41,30 +41,29 @@ PostgreSQL automatic backup and restore service with S3 storage integration.
 
 ## 📋 API Endpoints
 
-### Health & Info
+⚠️ **ВАЖНО:** Сервис работает в режиме scheduler-only для безопасности.
+
+### Публичные endpoint'ы
 
 ```bash
-GET  /api/v1/backup/health              # Service health check
-GET  /api/v1/backup/database/info       # Database info (version, size, tables)
-GET  /api/v1/backup/statistics          # Backup statistics
+GET  /api/v1/backup/health              # Service health check (только статус)
 ```
 
-### Backup Management
+### ❌ Удалено для безопасности
 
-```bash
-POST   /api/v1/backup/create            # Create manual backup
-GET    /api/v1/backup/list              # List all backups (with pagination)
-GET    /api/v1/backup/:id               # Get backup details
-POST   /api/v1/backup/:id/restore       # Restore from backup
-DELETE /api/v1/backup/:id               # Delete backup
-```
+Все остальные endpoint'ы удалены, включая read-only:
+- ❌ GET /api/v1/backup/list (раскрывает историю)
+- ❌ GET /api/v1/backup/statistics (раскрывает размеры БД)
+- ❌ GET /api/v1/backup/database/info (раскрывает структуру БД)
+- ❌ POST /api/v1/backup/create (используется scheduler)
+- ❌ POST /api/v1/backup/:id/restore (слишком опасно)
+- ❌ DELETE /api/v1/backup/:id (слишком опасно)
+- ❌ POST /api/v1/backup/schedule (настраивается через ENV)
 
-### Schedule Management
-
-```bash
-GET  /api/v1/backup/schedule            # Get backup schedules
-POST /api/v1/backup/schedule            # Update schedule settings
-```
+**Для мониторинга используйте:**
+- `kubectl logs` для просмотра логов
+- `kubectl exec` для доступа к БД
+- AWS CLI для просмотра S3 бакета
 
 ## 🚀 Quick Start
 

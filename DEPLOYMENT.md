@@ -91,7 +91,9 @@ kubectl logs -n backend -l app=backup-service -f
 
 ## 🧪 Step 4: Test the Service
 
-### 4.1 Health Check
+⚠️ **Внимание:** Сервис работает в режиме scheduler-only. Большинство endpoint'ов удалены для безопасности.
+
+### 4.1 Health Check (единственный публичный endpoint)
 
 ```bash
 curl https://api.test-shem.ru/api/v1/backup/health
@@ -102,34 +104,38 @@ Expected response:
 {
   "status": "ok",
   "timestamp": "2025-01-22T...",
-  "database": "connected"
+  "database": "connected",
+  "mode": "scheduler-only (no public API)"
 }
 ```
 
-### 4.2 Database Info
+### 4.2 Проверка логов (мониторинг)
 
 ```bash
-curl https://api.test-shem.ru/api/v1/backup/database/info
+# Посмотреть логи backup'ов
+kubectl logs -n backend -l app=backup-service -f
+
+# Последние 100 строк
+kubectl logs -n backend -l app=backup-service --tail=100
 ```
 
-### 4.3 Get Schedules
+### 4.3 Проверка backup'ов в S3
 
 ```bash
-curl https://api.test-shem.ru/api/v1/backup/schedule
+# Список backup'ов
+aws s3 ls s3://devcrm-backups/daily/
+aws s3 ls s3://devcrm-backups/weekly/
+aws s3 ls s3://devcrm-backups/monthly/
 ```
 
-### 4.4 Create Manual Backup
+### 4.4 Manual операции (через kubectl exec)
 
 ```bash
-curl -X POST https://api.test-shem.ru/api/v1/backup/create \
-  -H "Content-Type: application/json" \
-  -d '{"type": "MANUAL"}'
-```
+# Войти в pod
+kubectl exec -it -n backend deployment/backup-service -- sh
 
-### 4.5 List Backups
-
-```bash
-curl https://api.test-shem.ru/api/v1/backup/list
+# Проверить БД
+psql $DATABASE_URL -c "SELECT id, type, status, started_at FROM backup_logs ORDER BY started_at DESC LIMIT 5"
 ```
 
 ---

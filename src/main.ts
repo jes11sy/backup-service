@@ -34,22 +34,28 @@ async function bootstrap() {
     }),
   );
 
-  // Swagger documentation
-  const config = new DocumentBuilder()
-    .setTitle('Backup Service API')
-    .setDescription('PostgreSQL Backup & Restore Service with S3 Storage')
-    .setVersion('1.0')
-    .addTag('Backup')
-    .build();
+  // Swagger documentation (только в development)
+  const swaggerEnabled = process.env.SWAGGER_ENABLED !== 'false' && process.env.NODE_ENV !== 'production';
+  
+  if (swaggerEnabled) {
+    const config = new DocumentBuilder()
+      .setTitle('Backup Service API')
+      .setDescription('PostgreSQL Backup & Restore Service with S3 Storage (READ-ONLY)')
+      .setVersion('1.0')
+      .addTag('Backup')
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+    logger.log(`📚 Swagger docs available at http://localhost:${process.env.PORT || 5009}/api/docs`);
+  }
 
   const port = process.env.PORT || 5009;
   await app.listen(port, '0.0.0.0');
 
   logger.log(`🚀 Backup Service is running on port ${port}`);
-  logger.log(`📚 Swagger docs available at http://localhost:${port}/api/docs`);
+  logger.log(`🔒 Mode: scheduler-only (read-only API)`);
+  logger.log(`📊 Health check: http://localhost:${port}/api/v1/backup/health`);
 }
 
 bootstrap();
