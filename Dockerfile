@@ -1,8 +1,8 @@
 # Stage 1: Build
 FROM node:20-alpine AS builder
 
-# Установить postgresql-client для pg_dump/pg_restore
-RUN apk add --no-cache postgresql-client
+# Установить postgresql-client для pg_dump/pg_restore и openssl для Prisma
+RUN apk add --no-cache postgresql-client openssl1.1-compat
 
 WORKDIR /app
 
@@ -25,8 +25,8 @@ RUN npm run build
 # Stage 2: Production
 FROM node:20-alpine
 
-# Установить postgresql-client для pg_dump/pg_restore
-RUN apk add --no-cache postgresql-client gzip
+# Установить postgresql-client для pg_dump/pg_restore и openssl для Prisma
+RUN apk add --no-cache postgresql-client gzip openssl1.1-compat
 
 WORKDIR /app
 
