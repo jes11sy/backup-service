@@ -15,9 +15,10 @@ async function bootstrap() {
   // Enable CORS
   app.enableCors({
     origin: [
-      'https://callcentre.test-shem.ru',
-      'https://dir.test-shem.ru',
-      'https://master.test-shem.ru',
+      'https://callcentre.lead-schem.ru',
+      'https://new.lead-schem.ru',
+      'https://lead-schem.ru',
+      'https://core.lead-schem.ru',
       'http://localhost:3001',
       'http://localhost:3002',
       'http://localhost:3003',
