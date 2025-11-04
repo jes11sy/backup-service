@@ -1,8 +1,8 @@
 # Stage 1: Build
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 
-# Установить postgresql-client для pg_dump/pg_restore и openssl для Prisma
-RUN apk add --no-cache postgresql-client openssl1.1-compat
+# Установить postgresql-client для pg_dump/pg_restore
+RUN apt-get update && apt-get install -y postgresql-client openssl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -23,10 +23,10 @@ RUN npx prisma generate
 RUN npm run build
 
 # Stage 2: Production
-FROM node:20-alpine
+FROM node:20-slim
 
-# Установить postgresql-client для pg_dump/pg_restore и openssl для Prisma
-RUN apk add --no-cache postgresql-client gzip openssl1.1-compat
+# Установить postgresql-client для pg_dump/pg_restore
+RUN apt-get update && apt-get install -y postgresql-client gzip openssl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
